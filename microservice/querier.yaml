@@ -1,0 +1,75 @@
+auth_enabled: false
+
+target: querier
+
+server:
+  http_listen_port: 13103
+  grpc_listen_port: 19098
+  http_listen_address: 127.0.0.1
+  grpc_listen_address: 127.0.0.1
+  log_level: debug
+
+common:
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+  replication_factor: 1
+  path_prefix: /tmp/loki/q1
+  compactor_grpc_address: 127.0.0.1:19098
+
+ingester:
+  chunk_encoding: none
+  lifecycler:
+    address: localhost
+    port: 19098
+    ring:
+      kvstore:
+        store: memberlist
+      replication_factor: 1
+    final_sleep: 0s
+  chunk_idle_period: 5m
+  chunk_target_size: 1000000
+  chunk_retain_period: 30s
+  max_transfer_retries: 0
+analytics:
+  reporting_enabled: false
+
+schema_config:
+  configs:
+  - from: 2020-05-15
+    store: boltdb-shipper
+    object_store: filesystem
+    schema: v11
+    index:
+      prefix: index_
+      period: 24h
+
+memberlist:
+  node_name: 'querier'
+  abort_if_cluster_join_fails: false
+  bind_addr:
+    - localhost
+  bind_port: 27949
+  join_members:
+    - localhost:27947
+    - localhost:27948
+    - localhost:27949
+    - localhost:27951
+    - localhost:27952
+    # - localhost:27950
+
+ingester_client:
+  grpc_client_config:
+    tls_enabled: false
+    #tls_cert_path:
+    #tls_key_path:
+    #tls_ca_path:
+
+frontend_worker:
+  frontend_address: localhost:19099
+  grpc_client_config:
+    tls_enabled: false
+    #tls_cert_path:
+    #tls_key_path:
+    #tls_ca_path:
